@@ -193,27 +193,27 @@ class ModernTask(tk.Frame):
     def get_categoria_icon(self):
         icons = {
             'geral': '📋',
-            'trabalho': '💼',
+            'developer': '💻',
             'pessoal': '🏠',
             'estudos': '📚',
-            'saude': '🏃',
-            'compras': '🛒'
+            'playtester': '🎮',
+            'claims': '💾'
         }
         return icons.get(self.categoria, '📋')
     
     def get_categoria_color(self):
         colors = {
             'geral': COLORS['accent_blue'],
-            'trabalho': COLORS['accent_purple'],
+            'developer': COLORS['accent_purple'],
             'pessoal': COLORS['accent_green'],
             'estudos': COLORS['accent_yellow'],
-            'saude': COLORS['accent_red'],
-            'compras': COLORS['accent_blue']
+            'playtester': COLORS['accent_red'],
+            'claims': COLORS['accent_blue']
         }
         return colors.get(self.categoria, COLORS['text_secondary'])
     
     def ciclar_categoria(self, event=None):
-        categorias = ['geral', 'trabalho', 'pessoal', 'estudos', 'saude', 'compras']
+        categorias = ['geral', 'developer', 'pessoal', 'estudos', 'playtester', 'claims']
         current_idx = categorias.index(self.categoria)
         next_idx = (current_idx + 1) % len(categorias)
         self.categoria = categorias[next_idx]
@@ -288,7 +288,7 @@ class ModernEditModal:
         
         self.top = tk.Toplevel(parent)
         self.top.title("Editar Tarefa")
-        self.top.geometry("450x400")
+        self.top.geometry("495x450")
         self.top.configure(bg=COLORS['bg_primary'])
         self.top.resizable(False, False)
         self.top.transient(parent)
@@ -344,7 +344,7 @@ class ModernEditModal:
         ).pack(anchor="w", pady=(0, 6))
         
         self.categoria_var = tk.StringVar(value=self.task.categoria)
-        categorias = ['geral', 'trabalho', 'pessoal', 'estudos', 'saude', 'compras']
+        categorias = ['geral', 'developer', 'pessoal', 'estudos', 'playtester', 'claims']
         
         categoria_frame = tk.Frame(content, bg=COLORS['bg_primary'])
         categoria_frame.pack(fill=tk.X, pady=(0, 16))
@@ -454,7 +454,13 @@ class ModernTodoApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Organizador Moderno")
-        self.root.geometry("550x750")
+        self.root.geometry("570x800")
+
+        try:
+            self.root.iconbitmap("icone.ico")
+        except Exception:
+            pass
+
         self.root.configure(bg=COLORS['bg_primary'])
         self.root.minsize(450, 600)
         
@@ -743,7 +749,7 @@ class ModernTodoApp:
             "Organizador Moderno v2.0\n\n"
             "Um app de tarefas minimalista e elegante\n"
             "com alarmes e categorias inteligentes.\n\n"
-            "Desenvolvido com ❤️ usando Python"
+            "Desenvolvido por Cnat"
         )
     
     def save_data(self):
@@ -765,24 +771,7 @@ class ModernTodoApp:
             print(f"Erro ao salvar: {e}")
     
     def load_data(self):
-        if not os.path.exists(self.data_file):
-            # Adicionar algumas tarefas de exemplo
-            exemplos = [
-                ("✨ Bem-vindo ao Organizador Moderno!", "geral", True, None),
-                ("📱 Clique no ícone para mudar categoria", "trabalho", False, None),
-                ("⏰ Tarefa com alarme de exemplo", "pessoal", False, 
-                 (datetime.now() + timedelta(minutes=5)).isoformat())
-            ]
-            
-            for nome, cat, imp, alarme in exemplos:
-                task = ModernTask(
-                    self.tasks_container, nome,
-                    categoria=cat, importante=imp, alarme=alarme,
-                    funcao_apagar=self.delete_task,
-                    funcao_editar=self.edit_task
-                )
-                self.tasks.append(task)
-        else:
+        if os.path.exists(self.data_file):
             try:
                 with open(self.data_file, 'r', encoding='utf-8') as f:
                     data = json.load(f)
@@ -819,7 +808,7 @@ if __name__ == "__main__":
     
     # Centralizar janela
     root.update_idletasks()
-    width = 550
+    width = 850
     height = 750
     x = (root.winfo_screenwidth() // 2) - (width // 2)
     y = (root.winfo_screenheight() // 2) - (height // 2)
