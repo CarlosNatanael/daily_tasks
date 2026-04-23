@@ -250,6 +250,11 @@ class ModernTask(tk.Frame):
             self.funcao_apagar(self)
     
     def iniciar_monitor_alarme(self):
+        if getattr(self, '_thread_alarme_ativa', False):
+            return
+            
+        self._thread_alarme_ativa = True
+
         def verificar_alarme():
             while self.alarme and not self.concluida:
                 try:
@@ -258,12 +263,16 @@ class ModernTask(tk.Frame):
                     
                     if agora >= alarme_time:
                         self.disparar_alarme()
+                        self.alarme = None  # Limpa para não ficar buzinando em loop
                         break
-                except:
+                except Exception as e:
+                    print(f"Erro na thread de alarme: {e}")
                     break
                     
-                time.sleep(30)  # Verifica a cada 30 segundos
-        
+                time.sleep(10)  # Reduzi de 30 para 10 segundos para ser mais preciso
+            
+            self._thread_alarme_ativa = False
+    
         thread = threading.Thread(target=verificar_alarme, daemon=True)
         thread.start()
     
@@ -276,8 +285,8 @@ class ModernTask(tk.Frame):
                     app_name="Organizador Moderno",
                     timeout=10
                 )
-            except:
-                pass
+            except Exception as e:
+                print(f"Falha ao tentar exibir a notificação do Windows: {e}")
 
 # --- Modal de Edição Moderno ---
 class ModernEditModal:
@@ -440,7 +449,11 @@ class ModernEditModal:
                 if alarme_time < agora:
                     alarme_time += timedelta(days=1)
                 self.task.alarme = alarme_time.isoformat()
-            except:
+                
+                # LINHA ADICIONADA: Inicia o monitoramento logo após setar o horário
+                self.task.iniciar_monitor_alarme() 
+            except Exception as e:
+                print(f"Erro ao converter horário: {e}")
                 messagebox.showwarning("Aviso", "Formato de hora inválido! Use HH:MM")
                 return
         else:
